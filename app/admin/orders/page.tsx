@@ -124,7 +124,11 @@ export default async function AdminOrdersPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {orders.map((order: any) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
+                  <tr
+                    key={order.id}
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => window.location.href = `/admin/orders/${order.id}`}
+                  >
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
                         #{order.id.slice(0, 8).toUpperCase()}
