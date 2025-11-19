@@ -79,7 +79,11 @@ export default async function AdminCustomersPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {customers.map((customer: any) => (
-                  <tr key={customer.id} className="hover:bg-gray-50">
+                  <tr
+                    key={customer.id}
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => window.location.href = `/admin/customers/${customer.id}`}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {customer.first_name} {customer.last_name}
