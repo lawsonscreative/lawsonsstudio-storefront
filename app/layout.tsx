@@ -20,7 +20,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Lawsons Studio",
-  description: "Bold, creative, colourful merch with a strong automotive / lifestyle flavour.",
+  description: "Bold, creative, colourful fitness apparel designed for real training sessions.",
   robots: {
     index: false,
     follow: false,

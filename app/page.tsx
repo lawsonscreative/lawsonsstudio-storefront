@@ -29,7 +29,10 @@ export default async function HomePage() {
               Colourful.
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-base text-gray-600 sm:mt-4">
-              Automotive & lifestyle merch that stands out from the crowd.
+              Fitness apparel designed in Kent, UK – made for real training sessions.
+            </p>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-gray-500">
+              Hoodies, tees and vests built for actual training, not just mirror selfies.
             </p>
           </div>
         </div>

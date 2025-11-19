@@ -33,9 +33,16 @@ export function Footer() {
               Lawsons Studio
             </h3>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
-              Bold, creative, colourful merch with a strong automotive / lifestyle flavour.
+              Bold, creative, colourful fitness apparel designed for real training sessions.
               Stand out from the crowd.
             </p>
+            <div className="text-gray-400 text-xs space-y-1 mb-4">
+              <p>Lawsons Studio is a trading name of <strong className="text-gray-300">Lawsons Enterprises Ltd</strong></p>
+              <p>Registered in England &amp; Wales</p>
+              <p>Based in Kent, UK</p>
+              <p>Company No: [TODO: Add from config]</p>
+              <p>VAT No: [TODO: Add from config]</p>
+            </div>
             <div className="flex gap-4">
               <a
                 href="https://instagram.com/lawsonsstudio"
@@ -97,12 +104,17 @@ export function Footer() {
                   New Arrivals
                 </Link>
               </li>
+              <li>
+                <Link href="/about" className="text-gray-300 hover:text-brand-primary transition-colors">
+                  About Us
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Customer Service */}
+          {/* Help & Info */}
           <div>
-            <h3 className="font-heading text-lg font-semibold mb-4">Customer Service</h3>
+            <h3 className="font-heading text-lg font-semibold mb-4">Help & Info</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/customer/orders" className="text-gray-300 hover:text-brand-primary transition-colors">
@@ -110,13 +122,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/customer/addresses" className="text-gray-300 hover:text-brand-primary transition-colors">
-                  Delivery Information
+                <Link href="/help" className="text-gray-300 hover:text-brand-primary transition-colors">
+                  Help & FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/terms-and-conditions" className="text-gray-300 hover:text-brand-primary transition-colors">
-                  Returns & Refunds
+                <Link href="/shipping-returns" className="text-gray-300 hover:text-brand-primary transition-colors">
+                  Shipping & Returns
                 </Link>
               </li>
               <li>
@@ -131,7 +143,7 @@ export function Footer() {
           <div>
             <h3 className="font-heading text-lg font-semibold mb-4">Newsletter</h3>
             <p className="text-gray-300 text-sm mb-4">
-              Get the latest drops, exclusive offers, and automotive inspiration.
+              Get the latest drops, exclusive offers, and training inspiration.
             </p>
             <form onSubmit={handleNewsletterSubmit} className="space-y-2">
               <input
@@ -169,6 +181,9 @@ export function Footer() {
               <Link href="/privacy-policy" className="text-gray-400 hover:text-brand-primary transition-colors">
                 Privacy Policy
               </Link>
+              <Link href="/cookie-policy" className="text-gray-400 hover:text-brand-primary transition-colors">
+                Cookie Policy
+              </Link>
               <Link href="/terms-and-conditions" className="text-gray-400 hover:text-brand-primary transition-colors">
                 Terms & Conditions
               </Link>
@@ -176,6 +191,17 @@ export function Footer() {
                 Contact
               </a>
             </div>
+          </div>
+          <div className="mt-4 text-center text-xs text-gray-500">
+            Site designed &amp; built by{' '}
+            <a
+              href="https://www.lawsonscreative.co.uk/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-brand-primary transition-colors"
+            >
+              Lawsons Creative
+            </a>
           </div>
         </div>
       </div>
