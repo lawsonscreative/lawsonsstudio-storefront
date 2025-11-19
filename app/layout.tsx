@@ -5,6 +5,7 @@ import { getLawsonsStudioBrand } from "@/lib/brand/resolver";
 import { BrandThemeProvider } from "@/components/brand/BrandThemeProvider";
 import { CartProvider } from "@/lib/cart/CartContext";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -51,11 +52,14 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${poppins.variable} font-sans`}>
+      <body className={`${inter.variable} ${poppins.variable} font-sans flex flex-col min-h-screen`}>
         <CartProvider>
           <BrandThemeProvider brand={brand}>
             <Header brand={brand} />
-            {children}
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
           </BrandThemeProvider>
         </CartProvider>
       </body>
