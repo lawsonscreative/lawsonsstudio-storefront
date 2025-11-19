@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getLawsonsStudioBrand } from '@/lib/brand/resolver';
-import { getSupabaseServerClient } from '@/lib/supabase/server';
+import { getSupabaseClient } from '@/lib/supabase/server';
 import { formatPrice } from '@/lib/utils/format';
 
 export default async function AdminDashboardPage() {
@@ -14,7 +14,7 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  const supabase = getSupabaseServerClient();
+  const supabase = getSupabaseClient();
 
   // Fetch dashboard stats
   const [customersResult, ordersResult, productsResult, recentOrdersResult] = await Promise.all([
