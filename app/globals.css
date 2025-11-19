@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-primary: #28e8eb;
+  --brand-secondary: #ed474a;
+  --brand-accent: #50468c;
+  --brand-dark: #0f0f0f;
+}
+
+@layer base {
+  html {
+    background: #ffffff;
+    min-height: 100vh;
+  }
+
+  body {
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #ffffff;
+  }
+}
