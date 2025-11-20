@@ -350,6 +350,21 @@ export default function AdminDashboardPage() {
             </Link>
 
             <Link
+              href="/admin/users"
+              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-brand-primary hover:bg-brand-primary/5 transition-all group"
+            >
+              <div className="bg-gray-100 group-hover:bg-brand-primary/20 p-2 rounded-lg transition-colors">
+                <svg className="h-5 w-5 text-gray-600 group-hover:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Admin Users</p>
+                <p className="text-sm text-gray-600">Manage admin access</p>
+              </div>
+            </Link>
+
+            <Link
               href="/admin/customers"
               className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-brand-primary hover:bg-brand-primary/5 transition-all group"
             >
