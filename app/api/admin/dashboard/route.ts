@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getLawsonsStudioBrand } from '@/lib/brand/resolver';
 import { getSupabaseClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/auth/supabase-server';
+import { requireBrandAccess } from '@/lib/auth/admin-permissions';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,6 +13,14 @@ export async function GET(request: NextRequest) {
     if (!brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
     }
+
+    // Check admin permissions
+    const authSupabase = await createClient();
+    const {
+      data: { user },
+    } = await authSupabase.auth.getUser();
+
+    await requireBrandAccess(user?.id, brand.id);
 
     const supabase = getSupabaseClient();
 

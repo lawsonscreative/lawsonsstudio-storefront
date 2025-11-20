@@ -10,7 +10,29 @@ export function AccountButton() {
   const router = useRouter();
   const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Check if user is an admin via database
+  useEffect(() => {
+    async function checkAdminStatus() {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/admin/auth/me');
+        const data = await response.json();
+        setIsAdmin(data.isAdmin);
+      } catch (error) {
+        console.error('Failed to check admin status:', error);
+        setIsAdmin(false);
+      }
+    }
+
+    checkAdminStatus();
+  }, [user]);
 
   // Close dropdown when route changes
   useEffect(() => {
@@ -39,9 +61,6 @@ export function AccountButton() {
     router.push('/');
     router.refresh();
   };
-
-  // Check if user is an admin (for now, check against environment variable)
-  const isAdmin = user?.email && process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',').includes(user.email);
 
   if (!user) {
     const loginUrl = `/auth/login${pathname !== '/' ? `?redirect=${pathname}` : ''}`;
