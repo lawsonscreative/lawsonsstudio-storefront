@@ -1,34 +1,71 @@
-import { createClient } from '@/lib/auth/supabase-server';
+'use client';
 
-async function getCustomers() {
-  const supabase = await createClient();
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-  const { data: customers } = await supabase
-    .from('customers')
-    .select(`
-      id,
-      created_at,
-      email,
-      first_name,
-      last_name,
-      phone,
-      orders (
-        id
-      )
-    `)
-    .order('created_at', { ascending: false })
-    .limit(100);
+type Customer = {
+  id: string;
+  created_at: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  orders: any[];
+};
 
-  return customers || [];
-}
+export default function AdminCustomersPage() {
+  const router = useRouter();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function AdminCustomersPage() {
-  const customers = await getCustomers();
+  useEffect(() => {
+    async function fetchCustomers() {
+      try {
+        const response = await fetch('/api/admin/customers');
+        const data = await response.json();
+        setCustomers(data);
+      } catch (error) {
+        console.error('Failed to fetch customers:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCustomers();
+  }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl font-bold text-gray-900">Customers</h1>
+          <p className="mt-2 text-gray-600">View and manage customers</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-12">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="font-heading text-3xl font-bold text-gray-900">Customers</h1>
+        <Link
+          href="/admin"
+          className="text-sm text-brand-primary hover:text-brand-primary/80 mb-4 inline-flex items-center gap-2"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Dashboard
+        </Link>
+        <h1 className="font-heading text-3xl font-bold text-gray-900 mt-4">Customers</h1>
         <p className="mt-2 text-gray-600">View and manage customers</p>
       </div>
 
@@ -78,11 +115,11 @@ export default async function AdminCustomersPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {customers.map((customer: any) => (
+                {customers.map((customer) => (
                   <tr
                     key={customer.id}
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => window.location.href = `/admin/customers/${customer.id}`}
+                    onClick={() => router.push(`/admin/customers/${customer.id}`)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">

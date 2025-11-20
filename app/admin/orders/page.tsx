@@ -1,40 +1,24 @@
-import { createClient } from '@/lib/auth/supabase-server';
-import { getLawsonsStudioBrand } from '@/lib/brand/resolver';
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/utils/format';
 
-async function getOrders() {
-  const brand = await getLawsonsStudioBrand();
-  if (!brand) return [];
-
-  const supabase = await createClient();
-
-  const { data: orders } = await supabase
-    .from('orders')
-    .select(`
-      id,
-      created_at,
-      status,
-      total_amount,
-      currency,
-      customer_email,
-      customer_first_name,
-      customer_last_name,
-      tracking_number,
-      carrier,
-      inkthreadable_order_id,
-      order_items (
-        id,
-        product_name,
-        variant_name,
-        quantity
-      )
-    `)
-    .eq('brand_id', brand.id)
-    .order('created_at', { ascending: false })
-    .limit(100);
-
-  return orders || [];
-}
+type Order = {
+  id: string;
+  created_at: string;
+  status: string;
+  total_amount: number;
+  currency: string;
+  customer_email: string;
+  customer_first_name: string;
+  customer_last_name: string;
+  tracking_number: string | null;
+  carrier: string | null;
+  inkthreadable_order_id: string | null;
+  order_items: any[];
+};
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -64,13 +48,58 @@ function formatStatus(status: string) {
     .join(' ');
 }
 
-export default async function AdminOrdersPage() {
-  const orders = await getOrders();
+export default function AdminOrdersPage() {
+  const router = useRouter();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchOrders() {
+      try {
+        const response = await fetch('/api/admin/orders');
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl font-bold text-gray-900">Orders</h1>
+          <p className="mt-2 text-gray-600">Manage and track all orders</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-12">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="font-heading text-3xl font-bold text-gray-900">Orders</h1>
+        <Link
+          href="/admin"
+          className="text-sm text-brand-primary hover:text-brand-primary/80 mb-4 inline-flex items-center gap-2"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Dashboard
+        </Link>
+        <h1 className="font-heading text-3xl font-bold text-gray-900 mt-4">Orders</h1>
         <p className="mt-2 text-gray-600">Manage and track all orders</p>
       </div>
 
@@ -123,11 +152,11 @@ export default async function AdminOrdersPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {orders.map((order: any) => (
+                {orders.map((order) => (
                   <tr
                     key={order.id}
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => window.location.href = `/admin/orders/${order.id}`}
+                    onClick={() => router.push(`/admin/orders/${order.id}`)}
                   >
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">

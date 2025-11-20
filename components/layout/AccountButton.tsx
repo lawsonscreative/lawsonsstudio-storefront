@@ -40,6 +40,9 @@ export function AccountButton() {
     router.refresh();
   };
 
+  // Check if user is an admin (for now, check against environment variable)
+  const isAdmin = user?.email && process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',').includes(user.email);
+
   if (!user) {
     const loginUrl = `/auth/login${pathname !== '/' ? `?redirect=${pathname}` : ''}`;
     return (
@@ -88,6 +91,18 @@ export function AccountButton() {
               </p>
             </div>
             <div className="py-2">
+              {isAdmin && (
+                <>
+                  <Link
+                    href="/admin"
+                    className="block px-4 py-2 text-sm font-medium text-brand-primary hover:bg-brand-primary/5 transition-colors"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                  <div className="border-t border-gray-200 my-2" />
+                </>
+              )}
               <Link
                 href="/customer/orders"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
