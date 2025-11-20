@@ -5,29 +5,51 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 
+interface AdminPermissions {
+  isAdmin: boolean;
+  isSuperAdmin: boolean;
+  roles: string[];
+}
+
 export function AccountButton() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPerms, setAdminPerms] = useState<AdminPermissions>({
+    isAdmin: false,
+    isSuperAdmin: false,
+    roles: [],
+  });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if user is an admin via database
   useEffect(() => {
     async function checkAdminStatus() {
       if (!user) {
-        setIsAdmin(false);
+        setAdminPerms({
+          isAdmin: false,
+          isSuperAdmin: false,
+          roles: [],
+        });
         return;
       }
 
       try {
         const response = await fetch('/api/admin/auth/me');
         const data = await response.json();
-        setIsAdmin(data.isAdmin);
+        setAdminPerms({
+          isAdmin: data.isAdmin || false,
+          isSuperAdmin: data.isSuperAdmin || false,
+          roles: data.roles || [],
+        });
       } catch (error) {
         console.error('Failed to check admin status:', error);
-        setIsAdmin(false);
+        setAdminPerms({
+          isAdmin: false,
+          isSuperAdmin: false,
+          roles: [],
+        });
       }
     }
 
@@ -108,9 +130,17 @@ export function AccountButton() {
               <p className="text-sm font-medium text-gray-900 truncate">
                 {user.email}
               </p>
+              {adminPerms.isAdmin && (
+                <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-brand-primary/10 text-brand-primary">
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  {adminPerms.isSuperAdmin ? 'Super Admin' : 'Admin'}
+                </div>
+              )}
             </div>
             <div className="py-2">
-              {isAdmin && (
+              {adminPerms.isAdmin && (
                 <>
                   <Link
                     href="/admin"

@@ -1,34 +1,49 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/auth/supabase-server';
-import { getLawsonsStudioBrand } from '@/lib/brand/resolver';
+import { useParams } from 'next/navigation';
 import { formatPrice } from '@/lib/utils/format';
 
-async function getOrder(orderId: string) {
-  const brand = await getLawsonsStudioBrand();
-  if (!brand) return null;
-
-  const supabase = await createClient();
-
-  const { data: order } = await supabase
-    .from('orders')
-    .select(`
-      *,
-      order_items (
-        id,
-        product_name,
-        variant_name,
-        quantity,
-        price_at_purchase,
-        currency
-      )
-    `)
-    .eq('id', orderId)
-    .eq('brand_id', brand.id)
-    .single();
-
-  return order;
-}
+type Order = {
+  id: string;
+  created_at: string;
+  status: string;
+  total_amount: number;
+  shipping_amount: number;
+  tax_amount: number;
+  currency: string;
+  order_number: string | null;
+  customer_name: string | null;
+  customer_first_name: string;
+  customer_last_name: string;
+  customer_email: string;
+  customer_phone: string | null;
+  shipping_address_line1: string | null;
+  shipping_address_line2: string | null;
+  shipping_city: string | null;
+  shipping_county: string | null;
+  shipping_postal_code: string | null;
+  shipping_country: string | null;
+  billing_address_line1: string | null;
+  billing_address_line2: string | null;
+  billing_city: string | null;
+  billing_county: string | null;
+  billing_postal_code: string | null;
+  billing_country: string | null;
+  stripe_payment_intent_id: string | null;
+  stripe_checkout_session_id: string | null;
+  inkthreadable_order_id: string | null;
+  tracking_number: string | null;
+  carrier: string | null;
+  order_items: {
+    id: string;
+    product_name: string;
+    variant_name: string;
+    quantity: number;
+    unit_price_amount: number;
+  }[];
+};
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -58,19 +73,90 @@ function formatStatus(status: string) {
     .join(' ');
 }
 
-export default async function OrderDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const order = await getOrder(params.id);
+export default function OrderDetailPage() {
+  const params = useParams();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!order) {
-    notFound();
+  useEffect(() => {
+    async function fetchOrder() {
+      try {
+        const response = await fetch(`/api/admin/orders/${params.id}`);
+
+        if (response.status === 404) {
+          setError('Order not found');
+          setLoading(false);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch order');
+        }
+
+        const data = await response.json();
+        setOrder(data);
+      } catch (err) {
+        console.error('Failed to fetch order:', err);
+        setError('Failed to load order');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchOrder();
+  }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <Link
+            href="/admin/orders"
+            className="text-sm text-brand-primary hover:text-brand-primary/80 mb-4 inline-flex items-center gap-2"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Orders
+          </Link>
+          <h1 className="font-heading text-3xl font-bold text-gray-900 mt-4">Loading...</h1>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-12">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <Link
+            href="/admin/orders"
+            className="text-sm text-brand-primary hover:text-brand-primary/80 mb-4 inline-flex items-center gap-2"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Orders
+          </Link>
+          <h1 className="font-heading text-3xl font-bold text-gray-900 mt-4">Order Not Found</h1>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+          <p className="text-gray-600">{error || 'The order you are looking for does not exist.'}</p>
+        </div>
+      </div>
+    );
   }
 
   const subtotal = order.order_items?.reduce(
-    (sum: number, item: any) => sum + item.price_at_purchase * item.quantity,
+    (sum: number, item: any) => sum + item.unit_price_amount * item.quantity,
     0
   ) || 0;
 
@@ -139,10 +225,10 @@ export default async function OrderDetailPage({
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-gray-900">
-                      {formatPrice(item.price_at_purchase * item.quantity, item.currency)}
+                      {formatPrice(item.unit_price_amount * item.quantity, order.currency)}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {formatPrice(item.price_at_purchase, item.currency)} each
+                      {formatPrice(item.unit_price_amount, order.currency)} each
                     </p>
                   </div>
                 </div>
