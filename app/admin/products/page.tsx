@@ -118,6 +118,7 @@ export default async function AdminProductsPage() {
                                   alt={product.name}
                                   fill
                                   className="object-cover rounded"
+                                  unoptimized
                                 />
                               </div>
                             ) : (

@@ -34,6 +34,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
                   fill
                   className="object-contain p-8"
                   priority
+                  unoptimized
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-gray-500">
@@ -50,7 +51,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
                     key={i}
                     className="relative aspect-square overflow-hidden rounded-lg bg-white border border-gray-200"
                   >
-                    <Image src={url} alt={`${product.name} ${i + 1}`} fill className="object-contain p-2" />
+                    <Image src={url} alt={`${product.name} ${i + 1}`} fill className="object-contain p-2" unoptimized />
                   </div>
                 ))}
               </div>
