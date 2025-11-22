@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/auth/supabase-client';
 import Link from 'next/link';
+import { VariantBuilder } from '@/components/admin/VariantBuilder';
 
 interface ProductVariant {
   name: string;
@@ -30,6 +31,11 @@ export default function AddProductPage() {
   const [imageUrls, setImageUrls] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [providerType, setProviderType] = useState<'inkthreadable' | 'other'>('inkthreadable');
+
+  // Variant builder fields
+  const [skuPrefix, setSkuPrefix] = useState('');
+  const [inkthreadableBaseCode, setInkthreadableBaseCode] = useState('');
+  const [useVariantBuilder, setUseVariantBuilder] = useState(false);
 
   // Variant fields
   const [variants, setVariants] = useState<ProductVariant[]>([
@@ -336,25 +342,95 @@ export default function AddProductPage() {
           </div>
         </div>
 
-        {/* Variants */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="font-heading text-xl font-semibold text-gray-900">
-                Product Variants
-              </h2>
-              <p className="mt-1 text-sm text-gray-600">
-                Add sizes, colors, or other variations
-              </p>
+        {/* Variant Builder Configuration (only for Inkthreadable products) */}
+        {providerType === 'inkthreadable' && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="font-heading text-xl font-semibold text-gray-900 mb-4">
+              Variant Builder Setup
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  SKU Prefix
+                </label>
+                <input
+                  type="text"
+                  value={skuPrefix}
+                  onChange={(e) => setSkuPrefix(e.target.value.toUpperCase())}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+                  placeholder="LS-VEST-EMP"
+                />
+                <p className="mt-1 text-xs text-gray-500">Your product SKU prefix (e.g., LS-VEST-EMP)</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Inkthreadable Base Code
+                </label>
+                <input
+                  type="text"
+                  value={inkthreadableBaseCode}
+                  onChange={(e) => setInkthreadableBaseCode(e.target.value.toUpperCase())}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+                  placeholder="JC015"
+                />
+                <p className="mt-1 text-xs text-gray-500">Inkthreadable product code (e.g., JC015)</p>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={handleAddVariant}
-              className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-            >
-              + Add Variant
-            </button>
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={useVariantBuilder}
+                onChange={(e) => setUseVariantBuilder(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
+              />
+              <span className="ml-2 text-sm text-gray-700">
+                Use Variant Builder (automatically generate variants from colors and sizes)
+              </span>
+            </label>
           </div>
+        )}
+
+        {/* Variant Builder */}
+        {useVariantBuilder && skuPrefix && inkthreadableBaseCode && (
+          <VariantBuilder
+            skuPrefix={skuPrefix}
+            inkthreadableBaseCode={inkthreadableBaseCode}
+            defaultPrice={29.99}
+            onGenerate={(generatedVariants) => {
+              setVariants(generatedVariants);
+              setUseVariantBuilder(false); // Switch to manual mode after generation
+            }}
+          />
+        )}
+
+        {/* Manual Variants */}
+        {!useVariantBuilder && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="font-heading text-xl font-semibold text-gray-900">
+                  Product Variants {providerType === 'inkthreadable' && skuPrefix && inkthreadableBaseCode && (
+                    <button
+                      type="button"
+                      onClick={() => setUseVariantBuilder(true)}
+                      className="ml-3 text-sm font-normal text-brand-primary hover:text-brand-primary-dark"
+                    >
+                      Use Variant Builder
+                    </button>
+                  )}
+                </h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  {variants.length} variant{variants.length !== 1 ? 's' : ''} added
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddVariant}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+              >
+                + Add Variant
+              </button>
+            </div>
 
           <div className="space-y-4">
             {variants.map((variant, index) => (
@@ -473,7 +549,8 @@ export default function AddProductPage() {
               </div>
             ))}
           </div>
-        </div>
+          </div>
+        )}
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
