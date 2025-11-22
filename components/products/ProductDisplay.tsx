@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import type { ProductWithVariants, ProductVariant } from '@/types/database';
 import { formatPrice } from '@/lib/utils/format';
@@ -11,48 +11,79 @@ interface ProductDisplayProps {
   variants: ProductVariant[];
 }
 
+interface ParsedVariant {
+  variant: ProductVariant;
+  size: string;
+  color: string;
+}
+
 export function ProductDisplay({ product, variants }: ProductDisplayProps) {
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
 
-  // Extract unique colors and sizes from variants
+  // Parse all variants and extract size/color information
+  const parsedVariants = useMemo<ParsedVariant[]>(() => {
+    return variants.map((v) => {
+      // Extract size and color from variant name (e.g., "Medium - Jet Black")
+      const parts = v.name.split(' - ');
+      const size = parts.length > 0 ? parts[0].trim() : '';
+      const color = parts.length > 1 ? parts[1].trim() : '';
+      return { variant: v, size, color };
+    });
+  }, [variants]);
+
+  // Extract unique colors and sizes
   const colors = useMemo(() => {
     const colorSet = new Set<string>();
-    variants.forEach((v) => {
-      // Extract color from variant name (e.g., "Medium - Jet Black" -> "Jet Black")
-      const parts = v.name.split(' - ');
-      if (parts.length > 1) {
-        colorSet.add(parts[1].trim());
-      }
+    parsedVariants.forEach((pv) => {
+      if (pv.color) colorSet.add(pv.color);
     });
     return Array.from(colorSet);
-  }, [variants]);
+  }, [parsedVariants]);
 
   const sizes = useMemo(() => {
     const sizeSet = new Set<string>();
-    variants.forEach((v) => {
-      // Extract size from variant name (e.g., "Medium - Jet Black" -> "Medium")
-      const parts = v.name.split(' - ');
-      if (parts.length > 0) {
-        sizeSet.add(parts[0].trim());
-      }
+    parsedVariants.forEach((pv) => {
+      if (pv.size) sizeSet.add(pv.size);
     });
     return Array.from(sizeSet);
-  }, [variants]);
+  }, [parsedVariants]);
 
-  // Set initial selections
-  const [selectedColor, setSelectedColor] = useState(colors[0] || '');
-  const [selectedSize, setSelectedSize] = useState(sizes[0] || '');
+  // Initialize with first variant's attributes
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>('');
 
-  // Find the current variant based on selections
+  // Set initial state once parsed variants are ready
+  useEffect(() => {
+    if (parsedVariants.length > 0 && !selectedColor && !selectedSize) {
+      setSelectedColor(parsedVariants[0].color);
+      setSelectedSize(parsedVariants[0].size);
+    }
+  }, [parsedVariants, selectedColor, selectedSize]);
+
+  // Get available sizes for the selected color
+  const availableSizes = useMemo(() => {
+    if (!selectedColor) return sizes;
+    return parsedVariants
+      .filter((pv) => pv.color === selectedColor)
+      .map((pv) => pv.size);
+  }, [selectedColor, sizes, parsedVariants]);
+
+  // Get available colors for the selected size
+  const availableColors = useMemo(() => {
+    if (!selectedSize) return colors;
+    return parsedVariants
+      .filter((pv) => pv.size === selectedSize)
+      .map((pv) => pv.color);
+  }, [selectedSize, colors, parsedVariants]);
+
+  // Find the current variant based on exact size and color match
   const selectedVariant = useMemo(() => {
-    return variants.find((v) => {
-      const variantName = v.name.toLowerCase();
-      const colorMatch = selectedColor.toLowerCase();
-      const sizeMatch = selectedSize.toLowerCase();
-      return variantName.includes(colorMatch) && variantName.includes(sizeMatch);
-    }) || variants[0];
-  }, [variants, selectedColor, selectedSize]);
+    const match = parsedVariants.find(
+      (pv) => pv.size === selectedSize && pv.color === selectedColor
+    );
+    return match?.variant || variants[0];
+  }, [parsedVariants, selectedSize, selectedColor, variants]);
 
   // Get the image to display (variant-specific or product primary)
   const displayImage = useMemo(() => {
@@ -61,6 +92,38 @@ export function ProductDisplay({ product, variants }: ProductDisplayProps) {
     }
     return product.primary_image_url || (product.image_urls && product.image_urls[0]) || null;
   }, [selectedVariant, product]);
+
+  // Handle color change - keep size if available, otherwise switch to first available
+  const handleColorChange = (newColor: string) => {
+    setSelectedColor(newColor);
+    // Check if current size is available with new color
+    const sizeAvailable = parsedVariants.some(
+      (pv) => pv.color === newColor && pv.size === selectedSize
+    );
+    if (!sizeAvailable) {
+      // Switch to first available size for this color
+      const firstAvailableSize = parsedVariants.find((pv) => pv.color === newColor)?.size;
+      if (firstAvailableSize) {
+        setSelectedSize(firstAvailableSize);
+      }
+    }
+  };
+
+  // Handle size change - keep color if available, otherwise switch to first available
+  const handleSizeChange = (newSize: string) => {
+    setSelectedSize(newSize);
+    // Check if current color is available with new size
+    const colorAvailable = parsedVariants.some(
+      (pv) => pv.size === newSize && pv.color === selectedColor
+    );
+    if (!colorAvailable) {
+      // Switch to first available color for this size
+      const firstAvailableColor = parsedVariants.find((pv) => pv.size === newSize)?.color;
+      if (firstAvailableColor) {
+        setSelectedColor(firstAvailableColor);
+      }
+    }
+  };
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -123,14 +186,14 @@ export function ProductDisplay({ product, variants }: ProductDisplayProps) {
         {/* Variant Selection */}
         <div className="space-y-4">
           {/* Color Selector */}
-          {colors.length > 1 && (
+          {colors.length > 0 && (
             <div>
               <label className="block text-sm font-semibold uppercase tracking-wider text-gray-700 mb-2">
                 Color
               </label>
               <select
                 value={selectedColor}
-                onChange={(e) => setSelectedColor(e.target.value)}
+                onChange={(e) => handleColorChange(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 font-medium focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
               >
                 {colors.map((color) => (
@@ -143,18 +206,22 @@ export function ProductDisplay({ product, variants }: ProductDisplayProps) {
           )}
 
           {/* Size Selector */}
-          {sizes.length > 1 && (
+          {sizes.length > 0 && (
             <div>
               <label className="block text-sm font-semibold uppercase tracking-wider text-gray-700 mb-2">
                 Size
               </label>
               <select
                 value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
+                onChange={(e) => handleSizeChange(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 font-medium focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/20"
               >
                 {sizes.map((size) => (
-                  <option key={size} value={size}>
+                  <option
+                    key={size}
+                    value={size}
+                    disabled={!availableSizes.includes(size)}
+                  >
                     {size}
                   </option>
                 ))}
