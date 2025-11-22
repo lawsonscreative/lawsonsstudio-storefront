@@ -182,8 +182,8 @@ export default function AddProductPage() {
         throw variantsError;
       }
 
-      // Success - redirect to products page
-      router.push('/admin/products');
+      // Success - redirect to admin home
+      router.push('/admin');
       router.refresh();
     } catch (err) {
       console.error('Error creating product:', err);
@@ -573,12 +573,6 @@ export default function AddProductPage() {
           >
             {loading ? 'Creating Product...' : 'Create Product'}
           </button>
-          <Link
-            href="/admin/products"
-            className="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </Link>
         </div>
       </form>
     </div>
