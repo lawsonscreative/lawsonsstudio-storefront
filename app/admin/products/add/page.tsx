@@ -397,8 +397,9 @@ export default function AddProductPage() {
             inkthreadableBaseCode={inkthreadableBaseCode}
             defaultPrice={29.99}
             onGenerate={(generatedVariants) => {
-              setVariants(generatedVariants);
-              setUseVariantBuilder(false); // Switch to manual mode after generation
+              // Add to existing variants instead of replacing
+              setVariants([...variants.filter(v => v.name), ...generatedVariants]);
+              setUseVariantBuilder(false); // Hide builder after generation
             }}
           />
         )}
