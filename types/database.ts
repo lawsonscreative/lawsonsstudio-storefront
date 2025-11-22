@@ -49,8 +49,9 @@ export interface Product {
   description: string | null;
   is_active: boolean;
   inkthreadable_product_id: string | null;
-  image_urls: string[];
+  image_urls: string[] | null;
   primary_image_url: string | null;
+  provider_type: string | null;
   metadata: Json;
 }
 
@@ -65,10 +66,12 @@ export interface ProductVariant {
   price_amount: number; // in smallest currency unit (pence)
   currency: string;
   inkthreadable_variant_id: string | null;
+  inkthreadable_sku: string | null;
   stock_quantity: number | null;
   is_in_stock: boolean;
   size: string | null;
   color: string | null;
+  image_url: string | null;
   attributes: Json;
   metadata: Json;
 }
