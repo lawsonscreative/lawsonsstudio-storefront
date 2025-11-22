@@ -26,6 +26,7 @@ export default function AddProductPage() {
   // Product fields
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [description, setDescription] = useState('');
   const [primaryImageUrl, setPrimaryImageUrl] = useState('');
   const [imageUrls, setImageUrls] = useState('');
@@ -86,9 +87,14 @@ export default function AddProductPage() {
 
   const handleNameChange = (value: string) => {
     setName(value);
-    if (!slug) {
+    if (!slugManuallyEdited) {
       setSlug(generateSlug(value));
     }
+  };
+
+  const handleSlugChange = (value: string) => {
+    setSlug(value);
+    setSlugManuallyEdited(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -255,7 +261,7 @@ export default function AddProductPage() {
                 type="text"
                 required
                 value={slug}
-                onChange={(e) => setSlug(e.target.value)}
+                onChange={(e) => handleSlugChange(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                 placeholder="classic-logo-tshirt"
               />
