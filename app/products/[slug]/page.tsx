@@ -27,7 +27,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
           {/* Image Gallery */}
           <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-sm">
-              {product.primary_image_url || product.image_urls[0] ? (
+              {product.primary_image_url || (product.image_urls && product.image_urls[0]) ? (
                 <Image
                   src={product.primary_image_url || product.image_urls[0]}
                   alt={product.name}
@@ -43,7 +43,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </div>
 
             {/* Thumbnail strip */}
-            {product.image_urls.length > 1 && (
+            {product.image_urls && product.image_urls.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
                 {product.image_urls.slice(0, 4).map((url, i) => (
                   <div

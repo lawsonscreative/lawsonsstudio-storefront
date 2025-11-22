@@ -274,12 +274,15 @@ export default function AddProductPage() {
               </label>
               <input
                 id="primaryImage"
-                type="url"
+                type="text"
                 value={primaryImageUrl}
                 onChange={(e) => setPrimaryImageUrl(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-                placeholder="https://..."
+                placeholder="/products/my-product/front.jpg"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Use relative URLs (e.g., /products/my-product/image.jpg) or full URLs (e.g., https://...)
+              </p>
             </div>
 
             <div>
@@ -292,8 +295,11 @@ export default function AddProductPage() {
                 value={imageUrls}
                 onChange={(e) => setImageUrls(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-                placeholder="https://...&#10;https://..."
+                placeholder="/products/my-product/back.jpg&#10;/products/my-product/detail.jpg"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                One URL per line. Use relative URLs for files in public/ folder
+              </p>
             </div>
 
             <div>
