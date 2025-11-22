@@ -136,14 +136,17 @@ export default function AddProductPage() {
         .select()
         .single();
 
-      if (productError) throw productError;
+      if (productError) {
+        console.error('Product creation error:', productError);
+        throw productError;
+      }
 
       // Create variants
       const variantsToInsert = variants.map((variant) => ({
         product_id: product.id,
         name: variant.name,
         sku: variant.sku,
-        price_amount: variant.price_amount,
+        price_amount: Math.round(variant.price_amount * 100), // Convert pounds to pence
         currency: variant.currency,
         is_active: variant.is_active,
         is_in_stock: variant.is_in_stock,
@@ -154,13 +157,40 @@ export default function AddProductPage() {
         .from('product_variants')
         .insert(variantsToInsert);
 
-      if (variantsError) throw variantsError;
+      if (variantsError) {
+        console.error('Variants creation error:', variantsError);
+
+        // Rollback: delete the product we just created
+        await supabase.from('products').delete().eq('id', product.id);
+
+        throw variantsError;
+      }
 
       // Success - redirect to products page
       router.push('/admin/products');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create product');
+      console.error('Error creating product:', err);
+
+      // Extract detailed error message from Supabase error
+      let errorMessage = 'Failed to create product';
+
+      if (err && typeof err === 'object') {
+        const supabaseError = err as any;
+
+        // Check for duplicate slug error
+        if (supabaseError.code === '23505' || supabaseError.message?.includes('unique')) {
+          errorMessage = 'A product with this URL slug already exists. Please choose a different slug.';
+        } else if (supabaseError.message) {
+          errorMessage = supabaseError.message;
+        } else if (supabaseError.hint) {
+          errorMessage = `${supabaseError.message || 'Error'}: ${supabaseError.hint}`;
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

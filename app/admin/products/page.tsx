@@ -3,6 +3,7 @@ import { getLawsonsStudioBrand } from '@/lib/brand/resolver';
 import { formatPrice } from '@/lib/utils/format';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ProductActions } from './ProductActions';
 
 async function getProducts() {
   const brand = await getLawsonsStudioBrand();
@@ -165,13 +166,11 @@ export default async function AdminProductsPage() {
                           : `${formatPrice(minPrice, currency)} - ${formatPrice(maxPrice, currency)}`}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link
-                          href={`/products/${product.slug}`}
-                          className="text-brand-primary hover:text-brand-primary/90 mr-4"
-                        >
-                          View
-                        </Link>
-                        <button className="text-gray-600 hover:text-gray-900">Edit</button>
+                        <ProductActions
+                          productId={product.id}
+                          productSlug={product.slug}
+                          productName={product.name}
+                        />
                       </td>
                     </tr>
                   );
