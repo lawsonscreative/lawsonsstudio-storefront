@@ -2,6 +2,9 @@ import { getLawsonsStudioBrand } from '@/lib/brand/resolver';
 import { getProducts } from '@/lib/products/queries';
 import { ProductGrid } from '@/components/products/ProductGrid';
 
+// Revalidate every 60 seconds
+export const revalidate = 60;
+
 export default async function HomePage() {
   const brand = await getLawsonsStudioBrand();
 

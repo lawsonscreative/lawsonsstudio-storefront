@@ -5,6 +5,9 @@ import { getProductBySlug } from '@/lib/products/queries';
 import { AddToCartButton } from '@/components/products/AddToCartButton';
 import { formatPrice } from '@/lib/utils/format';
 
+// Revalidate every 60 seconds
+export const revalidate = 60;
+
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const brand = await getLawsonsStudioBrand();
 
