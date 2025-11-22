@@ -86,6 +86,19 @@ export default async function ProductPage({ params }: { params: { slug: string }
                       key={variant.id}
                       className="group relative flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 transition-all hover:border-brand-accent hover:shadow-md"
                     >
+                      {variant.image_url && (
+                        <div className="h-16 w-16 flex-shrink-0 mr-4">
+                          <div className="relative h-16 w-16 rounded bg-gray-100">
+                            <Image
+                              src={variant.image_url}
+                              alt={variant.name}
+                              fill
+                              className="object-cover rounded"
+                              unoptimized
+                            />
+                          </div>
+                        </div>
+                      )}
                       <div className="flex-1">
                         <div className="font-medium text-gray-900">{variant.name}</div>
                         {variant.sku && (

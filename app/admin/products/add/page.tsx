@@ -13,6 +13,7 @@ interface ProductVariant {
   is_active: boolean;
   is_in_stock: boolean;
   inkthreadable_sku?: string;
+  image_url?: string;
 }
 
 export default function AddProductPage() {
@@ -40,6 +41,7 @@ export default function AddProductPage() {
       is_active: true,
       is_in_stock: true,
       inkthreadable_sku: '',
+      image_url: '',
     },
   ]);
 
@@ -54,6 +56,7 @@ export default function AddProductPage() {
         is_active: true,
         is_in_stock: true,
         inkthreadable_sku: '',
+        image_url: '',
       },
     ]);
   };
@@ -151,6 +154,7 @@ export default function AddProductPage() {
         is_active: variant.is_active,
         is_in_stock: variant.is_in_stock,
         inkthreadable_sku: providerType === 'inkthreadable' ? variant.inkthreadable_sku : null,
+        image_url: variant.image_url || null,
       }));
 
       const { error: variantsError } = await supabase
@@ -413,6 +417,22 @@ export default function AddProductPage() {
                     />
                   </div>
 
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Variant Image URL (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={variant.image_url || ''}
+                      onChange={(e) => handleVariantChange(index, 'image_url', e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+                      placeholder="/products/my-product/color-variant.jpg"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Optional: Different image for this variant (e.g., different color)
+                    </p>
+                  </div>
+
                   {providerType === 'inkthreadable' && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -428,7 +448,7 @@ export default function AddProductPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 col-span-2">
                     <label className="flex items-center">
                       <input
                         type="checkbox"
